@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do List</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif; /* Professional font */
+            background-color: #f4f4f4; /* Light gray background */
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            height: 100vh;
+            animation: fadeIn 1s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .container {
+            background-color: #ffffff; /* White background */
+            border-radius: 8px; /* Less rounded corners */
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+            width: 400px;
+            padding: 20px; /* Compact padding */
+            text-align: center;
+        }
+
+        h1 {
+            color: #2c3e50; /* Darker blue */
+            margin-bottom: 20px;
+            font-size: 24px; /* Smaller title */
+        }
+
+        .date-input,
+        .task-input {
+            width: calc(100% - 20px);
+            padding: 10px;
+            border: 2px solid #2980b9; /* Blue border */
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .date-input:focus,
+        .task-input:focus {
+            border-color: #3498db; /* Lighter blue on focus */
+            outline: none;
+        }
+
+        .add-button,
+        .refresh-button {
+            background-color: #2980b9; /* Blue button */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 15px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+            margin: 5px 0;
+        }
+
+        .add-button:hover,
+        .refresh-button:hover {
+            background-color: #3498db; /* Lighter blue */
+            transform: scale(1.05);
+        }
+
+        .todo-list,
+        .completed-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            text-align: left;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .todo-item, .completed-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #ddd; /* Light gray border */
+            transition: background-color 0.3s;
+        }
+
+        .todo-item:hover {
+            background-color: #f0f0f0; /* Light gray on hover */
+        }
+
+        .todo-checkbox {
+            margin-right: 10px;
+            cursor: pointer;
+        }
+
+        .remove-button {
+            background-color: #e74c3c; /* Red */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+            margin-left: auto;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        .remove-button:hover {
+            background-color: #c0392b; /* Darker red */
+            transform: scale(1.1);
+        }
+
+        .empty-message {
+            color: #999;
+            font-size: 14px;
+        }
+
+        .completed-tasks {
+            margin-top: 20px;
+            border-top: 2px solid #2980b9; /* Blue top border */
+            padding-top: 10px;
+            display: none;
+        }
+
+        .good-job-message {
+            display: none;
+            font-size: 20px; /* Smaller */
+            color: #2980b9;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Daily To-Do List</h1>
+        <input type="date" class="date-input" id="datePicker" />
+        <input type="text" class="task-input" id="taskInput" placeholder="Add a new task..." />
+        <button class="add-button" id="addButton">Add Task</button>
+        <button class="refresh-button" id="refreshButton">Refresh Completed Tasks</button>
+        <ul class="todo-list" id="todoList"></ul>
+        <p class="empty-message" id="emptyMessage">No tasks for today!</p>
+        
+        <div class="completed-tasks" id="completedTasks">
+            <h2>Completed Tasks</h2>
+            <ul class="completed-list" id="completedList"></ul>
+        </div>
+
+        <div class="good-job-message" id="goodJobMessage">Great Job!</div>
+    </div>
+
+    <script>
+        const addButton = document.getElementById('addButton');
+        const refreshButton = document.getElementById('refreshButton');
+        const taskInput = document.getElementById('taskInput');
+        const todoList = document.getElementById('todoList');
+        const datePicker = document.getElementById('datePicker');
+        const emptyMessage = document.getElementById('emptyMessage');
+        const completedTasks = document.getElementById('completedTasks');
+        const completedList = document.getElementById('completedList');
+        const goodJobMessage = document.getElementById('goodJobMessage');
+
+        function loadTasks() {
+            const currentDate = datePicker.value;
+            const tasks = JSON.parse(localStorage.getItem(currentDate)) || [];
+            const completedTasksData = JSON.parse(localStorage.getItem(`completed_${currentDate}`)) || [];
+
+            // Clear current lists
+            todoList.innerHTML = '';
+            completedList.innerHTML = '';
+            updateEmptyMessage();
+
+            // Load active tasks
+            tasks.forEach(taskValue => {
+                createTodoItem(taskValue, currentDate);
+            });
+
+            // Load completed tasks
+            completedTasksData.forEach(taskValue => {
+                createCompletedItem(taskValue, currentDate);
+            });
+        }
+
+        function createTodoItem(taskValue, date) {
+            const todoItem = document.createElement('li');
+            todoItem.classList.add('todo-item');
+
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.classList.add('todo-checkbox');
+
+            const taskText = document.createElement('span');
+            taskText.textContent = taskValue;
+
+            const removeButton = document.createElement('button');
+            removeButton.textContent = 'Remove';
+            removeButton.classList.add('remove-button');
+
+            checkbox.addEventListener('change', () => {
+                if (checkbox.checked) {
+                    todoItem.remove();
+                    addCompletedTask(taskValue, date);
+                    showGoodJobMessage();
+                }
+                updateEmptyMessage();
+            });
+
+            removeButton.addEventListener('click', () => {
+                todoItem.remove();
+                removeTaskFromStorage(taskValue, date);
+                updateEmptyMessage();
+            });
+
+            todoItem.appendChild(checkbox);
+            todoItem.appendChild(taskText);
+            todoItem.appendChild(removeButton);
+            todoList.appendChild(todoItem);
+        }
+
+        function addCompletedTask(taskValue, date) {
+            const completedTasksData = JSON.parse(localStorage.getItem(`completed_${date}`)) || [];
+            completedTasksData.push(taskValue);
+            localStorage.setItem(`completed_${date}`, JSON.stringify(completedTasksData));
+            createCompletedItem(taskValue, date);
+        }
+
+        function createCompletedItem(taskValue, date) {
+            const completedItem = document.createElement('li');
+            completedItem.classList.add('completed-item');
+            completedItem.textContent = taskValue;
+            completedList.appendChild(completedItem);
+            completedTasks.style.display = 'block'; // Show completed tasks section
+        }
+
+        function showGoodJobMessage() {
+            goodJobMessage.style.display = 'block';
+            setTimeout(() => {
+                goodJobMessage.style.display = 'none';
+            }, 1000); // Display for 1 second
+        }
+
+        function updateEmptyMessage() {
+            emptyMessage.style.display = todoList.childElementCount === 0 ? 'block' : 'none';
+        }
+
+        function removeTaskFromStorage(taskValue, date) {
+            const tasks = JSON.parse(localStorage.getItem(date)) || [];
+            const newTasks = tasks.filter(task => task !== taskValue);
+            localStorage.setItem(date, JSON.stringify(newTasks));
+        }
+
+        addButton.addEventListener('click', () => {
+            const taskValue = taskInput.value.trim();
+            const currentDate = datePicker.value;
+            if (!taskValue || !currentDate) return;
+
+            const tasks = JSON.parse(localStorage.getItem(currentDate)) || [];
+            tasks.push(taskValue);
+            localStorage.setItem(currentDate, JSON.stringify(tasks));
+
+            taskInput.value = '';
+            createTodoItem(taskValue, currentDate);
+            updateEmptyMessage();
+        });
+
+        datePicker.addEventListener('change', loadTasks);
+
+        refreshButton.addEventListener('click', () => {
+            const currentDate = datePicker.value;
+            localStorage.removeItem(currentDate); // Remove all tasks for the selected date
+            localStorage.removeItem(`completed_${currentDate}`); // Remove completed tasks for the selected date
+            loadTasks();
+        });
+
+        updateEmptyMessage();
+    </script>
+</body>
+</html>

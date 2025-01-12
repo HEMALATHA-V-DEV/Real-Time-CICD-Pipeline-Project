@@ -1,0 +1,124 @@
+/* Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #f4f7fb;
+    font-family: 'Arial', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    color: #333;
+}
+
+.container {
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+    width: 80%;
+    max-width: 600px;
+    text-align: center;
+}
+
+/* Header */
+h1 {
+    color: #3e8e41;
+    margin-bottom: 20px;
+}
+
+/* Calendar */
+.calendar-container input {
+    padding: 10px;
+    width: 80%;
+    margin-top: 10px;
+    border: 2px solid #3e8e41;
+    border-radius: 8px;
+    font-size: 16px;
+    text-align: center;
+    outline: none;
+}
+
+/* Task Input Section */
+.task-input input {
+    width: 70%;
+    padding: 12px;
+    border: 2px solid #3e8e41;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    font-size: 16px;
+}
+
+.task-input button {
+    padding: 12px 25px;
+    background-color: #3e8e41;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.task-input button:hover {
+    background-color: #356d30;
+}
+
+/* Task List */
+#taskList {
+    margin-top: 30px;
+}
+
+.task-item {
+    display: flex;
+    justify-content: space-between;
+    background-color: #f0f9f4;
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.task-item.completed {
+    background-color: #d4f8d4;
+    text-decoration: line-through;
+}
+
+button.delete, button.check {
+    background-color: #4CAF50;
+    color: white;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+button.delete {
+    background-color: red;
+}
+
+button.delete:hover {
+    background-color: darkred;
+}
+
+button.check {
+    background-color: #4CAF50;
+}
+
+button.check:hover {
+    background-color: darkgreen;
+}
+
+/* Celebration Message */
+.celebration {
+    margin-top: 30px;
+    padding: 20px;
+    background-color: #e8f5e9;
+    border: 2px solid #4CAF50;
+    border-radius: 8px;
+    color: #4CAF50;
+    font-size: 18px;
+}
